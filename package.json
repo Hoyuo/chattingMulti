@@ -1,0 +1,15 @@
+{
+  "name": "chattingMulti",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "express": "~4.11.1",
+    "socket.io": "0.9.6",
+    "bodyParser": "*",
+    "cookieParser": "*",
+    "mongodb": "*"
+  }
+}
