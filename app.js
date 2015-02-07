@@ -4,43 +4,39 @@ var http = require('http');
 var path = require('path');
 
 var app = express();
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '/public')));
 
-var httpServer = http.createServer(app).listen(3000, function (req, res) {
-    console.log('Socket IO server has been started');
-});
-// upgrade http server to socket.io server
+var httpServer = http.createServer(app).listen(13000);
 var io = require('socket.io').listen(httpServer);
 
-io.configure(function(){
-    io.set('transports', ['xhr-polling']);
-    io.set('polling duration', 10);
-    io.set('log level', 2);
-});
-
 var socket_ids = [];
-var count = 0;
 
 function registerUser(socket, nickname) {
     // socket_id와 nickname 테이블을 셋업
     socket.get('nickname', function (err, pre_nick) {
         if (pre_nick != undefined) delete socket_ids[pre_nick];
-        socket_ids[nickname] = socket.id
+        socket_ids[nickname] = socket.id;
         socket.set('nickname', nickname, function () {
-            io.sockets.emit('userlist', {users: Object.keys(socket_ids)});
         });
     });
 }
 
 io.sockets.on('connection', function (socket) {
-
+    console.log('connection', socket.id);
     socket.emit('new');
 
-    socket.on('newSend', function(data) {
+    socket.on('newSend', function (data) {
         registerUser(socket, data);
     });
 
-    socket.on('disconnect', function (data) {
+    socket.on('btn', function (data) {
+        socket_id = socket_ids['webPage'];
+        if (socket_id != undefined) {
+            io.sockets.socket(socket_id).emit('broadcast_msg', {msg: data});
+        }// if
+    });
+
+    socket.on('disconnect', function () {
         socket.get('nickname', function (err, nickname) {
             if (nickname != undefined) {
                 delete socket_ids[nickname];
@@ -61,7 +57,7 @@ io.sockets.on('connection', function (socket) {
                     io.sockets.socket(socket_id).emit('broadcast_msg', data);
                 }// if
             }
-            socket.emit('broadcast_msg_1',data);
+            socket.emit('broadcast_msg_1', data);
         });
     });
 });
